@@ -1,0 +1,150 @@
+/*Code written by Rakesh Jha. 
+Part of Epic Games Test*/
+
+#include <iostream>
+using namespace std;
+
+/*
+3)  Write the code for the following function, without using any built-in functions.
+
+char* itoa(int Value, int Base);
+
+where the returned value is allocated on behalf of the caller, value is the integer to convert, and base is octal, decimal, or hex.
+
+*/
+
+void c_divide_modulo(int _divident, int _divisor, int& _quotient, int& _remainder)
+{
+	int count = 0;
+	int div = _divident;
+	while(div >= _divisor)
+	{
+		count ++;
+		div -= _divisor;
+	}
+	_quotient = count;
+	_remainder = div;
+}
+
+char* c_itoa(int _val, int _base, char* _buffer)
+{
+	int buffCount = 0;
+	int val = _val;
+	int base = _base;
+	int qtn, rmd;
+
+	if(val == 0)
+	{
+		_buffer[buffCount++] = '0';
+	}
+
+	while(val > 0)
+	{
+		c_divide_modulo(val, base, qtn, rmd);
+		val = qtn;
+		_buffer[buffCount++] = rmd > 9 ? (rmd - 10) + 'A': rmd + '0';
+	}
+
+	/*Reverse the buffer*/
+	int i = 0;
+	int j = buffCount - 1;
+	while(i < j)
+	{
+		char tempChar = _buffer[i];
+		char tempChar2 = _buffer[j];
+		_buffer[i] = tempChar2;
+		_buffer[j] = tempChar;
+		i++;
+		j--;
+	}
+	_buffer[buffCount] = '\0';
+	return _buffer;
+}
+
+
+
+
+/*
+4) Write a function with the following signature that, given a matrix of integers, builds a string with the entries of that matrix appended in clockwise order. 
+*/
+
+
+void BuildStringFromMatrix(int* Matrix, int NumRows, int NumColumns, char* OutBuffer)
+{
+	enum e_Direction
+	{
+		DIR_RIGHT,
+		DIR_LEFT,
+		DIR_UP,
+		DIR_DOWN
+	};
+	e_Direction dir = DIR_RIGHT;
+
+	int noOfElements = NumRows*NumColumns; // Total elements in array. Helps avoid creating array and popping with while loop.
+	int borderLimVal = NumColumns; //Trigger a direction change.
+	int borderChangeDecay = 1; // change in progression t => n, t => t + m-(borderChangeDecay = 1), t => t + n-(borderChangeDecay == 1), t => t + m-(borderChangeDecay == 2), t => t + n-(borderChangeDecay == 2), ......., where t = borderLimVal, borderChangedecay is the decay here -1, -2, ....(onion skin), m = numberOfRows and n = numberOfColumns.  
+	int arrIDx = -1;
+	int endPoint = 0;
+	for ( int i = 0; i < noOfElements; ++i)
+	{
+		if (i >= borderLimVal)
+		{
+			switch(dir)
+			{
+			case DIR_RIGHT:
+				borderLimVal += NumRows - borderChangeDecay;
+				dir = DIR_DOWN;
+			break;
+			case DIR_LEFT:
+				borderLimVal += NumRows - borderChangeDecay;
+				dir = DIR_UP;
+			break;
+			case DIR_UP:
+				borderLimVal += NumColumns - borderChangeDecay++;
+				dir = DIR_RIGHT;
+			break;
+			case DIR_DOWN:
+				borderLimVal += NumColumns - borderChangeDecay++;
+				dir = DIR_LEFT;
+			break;
+			}
+		}
+
+		switch(dir)
+		{
+		case DIR_RIGHT:
+				++arrIDx;
+			break;
+		case DIR_LEFT:
+				--arrIDx;
+			break;
+		case DIR_UP:
+			arrIDx -= NumColumns;
+			break;
+		case DIR_DOWN:
+			arrIDx += NumColumns;
+			break;
+		}
+		char tempBuffer[100];
+		c_itoa(Matrix[arrIDx], 10, tempBuffer); // I have used base 10 here. Other bases also work.
+		int count = strlen(tempBuffer);
+		for(int idx = 0; idx < count; ++idx )
+		{
+			OutBuffer[endPoint] = tempBuffer[idx];
+			endPoint++;
+		}
+	}
+}
+
+
+int main(int* argv, char** argc)
+{
+	int matrix[24] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23};
+
+	char outBuffer[100];
+	memset(outBuffer, '\0', 100);
+	BuildStringFromMatrix(matrix, 6, 4, outBuffer);
+	cout<<outBuffer<<endl;
+	system("Pause");
+	return 0;
+}
